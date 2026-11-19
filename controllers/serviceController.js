@@ -148,9 +148,176 @@ function listBookings(req, res) {
   });
 }
 
+function getBookingType(req, res) {
+  if (req.params.type === 'service') return 'service';
+  if (req.params.type === 'boarding') return 'boarding';
+  res.status(404).send('Booking not found.');
+  return null;
+}
+
+function isValidBookingId(value) {
+  const bookingId = Number(value);
+  return Number.isSafeInteger(bookingId) && bookingId > 0;
+}
+
+function renderBookingEdit(req, res, booking, pets, services) {
+  return res.render('editBooking', {
+    booking,
+    bookingType: req.params.type,
+    pets,
+    services: services || [],
+    rooms: boardingBookingModel.ROOM_OPTIONS,
+    timeSlots: boardingBookingModel.TIME_SLOTS,
+    messages: req.flash('success'),
+    errors: req.flash('error'),
+    session: req.session
+  });
+}
+
+function editBooking(req, res) {
+  const bookingType = getBookingType(req, res);
+  if (!bookingType) return;
+  if (!isValidBookingId(req.params.id)) return res.status(404).send('Booking not found.');
+
+  const ownerId = req.session.user.id;
+  const getBooking = bookingType === 'service'
+    ? serviceBookingModel.getBookingByIdAndOwner
+    : boardingBookingModel.getBoardingBookingByIdAndOwner;
+
+  getBooking(ownerId, Number(req.params.id), (bookingError, rows) => {
+    if (bookingError) {
+      console.error('Unable to load booking for editing:', bookingError);
+      return res.status(500).send('Unable to load the booking.');
+    }
+
+    if (!rows || !rows.length) return res.status(404).send('Booking not found.');
+    const booking = rows[0];
+
+    petModel.getPetsByOwner(ownerId, (petError, pets) => {
+      if (petError) {
+        console.error('Unable to load pets for booking edit:', petError);
+        return res.status(500).send('Unable to load your pets.');
+      }
+
+      if (bookingType === 'boarding') {
+        return renderBookingEdit(req, res, booking, pets);
+      }
+
+      serviceModel.getServicesForBookingEdit((serviceError, services) => {
+        if (serviceError) {
+          console.error('Unable to load services for booking edit:', serviceError);
+          return res.status(500).send('Unable to load services.');
+        }
+        return renderBookingEdit(req, res, booking, pets, services);
+      });
+    });
+  });
+}
+
+function updateBooking(req, res) {
+  const bookingType = getBookingType(req, res);
+  if (!bookingType) return;
+  if (!isValidBookingId(req.params.id)) return res.status(404).send('Booking not found.');
+
+  const ownerId = req.session.user.id;
+  const bookingId = Number(req.params.id);
+  const editPath = `/bookings/${bookingType}/${bookingId}/edit`;
+
+  if (bookingType === 'service') {
+    const booking = {
+      petId: Number(req.body.petId),
+      serviceId: Number(req.body.serviceId),
+      bookingDate: req.body.bookingDate
+    };
+    if (!Number.isInteger(booking.petId) || booking.petId < 1
+      || !Number.isInteger(booking.serviceId) || booking.serviceId < 1
+      || !isValidDateString(booking.bookingDate)) {
+      req.flash('error', 'Choose a pet, service, and valid booking date.');
+      return res.redirect(editPath);
+    }
+
+    return serviceBookingModel.updateBooking(ownerId, bookingId, booking, (error, result) => {
+      if (error) {
+        console.error('Unable to update pet service booking:', error);
+        req.flash('error', 'Unable to update the booking. Please try again.');
+        return res.redirect(editPath);
+      }
+      if (!result) return res.status(404).send('Booking not found.');
+      if (result.invalid) {
+        req.flash('error', 'Choose one of your pets and a valid service.');
+        return res.redirect(editPath);
+      }
+      req.flash('success', 'Pet Service booking updated successfully.');
+      return res.redirect('/bookings');
+    });
+  }
+
+  const booking = {
+    petId: req.body.petId,
+    roomKey: req.body.roomKey,
+    checkInDate: req.body.checkInDate,
+    checkInTime: req.body.checkInTime,
+    pickUpDate: req.body.pickUpDate,
+    pickUpTime: req.body.pickUpTime
+  };
+  const petId = Number(booking.petId);
+  const roomExists = boardingBookingModel.ROOM_OPTIONS.some((room) => room.key === booking.roomKey);
+  const datesValid = boardingBookingModel.isValidDateString(booking.checkInDate)
+    && boardingBookingModel.isValidDateString(booking.pickUpDate)
+    && booking.pickUpDate > booking.checkInDate;
+  const timesValid = boardingBookingModel.TIME_SLOTS.some((slot) => slot.value === booking.checkInTime)
+    && boardingBookingModel.TIME_SLOTS.some((slot) => slot.value === booking.pickUpTime);
+
+  if (!Number.isInteger(petId) || petId < 1 || !roomExists || !datesValid || !timesValid) {
+    req.flash('error', 'Check your pet, dates, times, and room selection, then try again.');
+    return res.redirect(editPath);
+  }
+
+  boardingBookingModel.updateBoardingBooking(ownerId, bookingId, booking, (error, result) => {
+    if (error) {
+      console.error('Unable to update pet boarding booking:', error);
+      req.flash('error', 'Unable to update the booking. Please try again.');
+      return res.redirect(editPath);
+    }
+    if (!result) return res.status(404).send('Booking not found.');
+    if (result.invalid) {
+      req.flash('error', 'Choose one of your pets, then try again.');
+      return res.redirect(editPath);
+    }
+    req.flash('success', 'Pet Boarding booking updated successfully.');
+    return res.redirect('/bookings');
+  });
+}
+
+function deleteBooking(req, res) {
+  const bookingType = getBookingType(req, res);
+  if (!bookingType) return;
+  if (!isValidBookingId(req.params.id)) return res.status(404).send('Booking not found.');
+
+  const ownerId = req.session.user.id;
+  const bookingId = Number(req.params.id);
+  const deleteModel = bookingType === 'service'
+    ? serviceBookingModel.deleteBooking
+    : boardingBookingModel.deleteBoardingBooking;
+
+  deleteModel(ownerId, bookingId, (error, result) => {
+    if (error) {
+      console.error('Unable to delete booking:', error);
+      req.flash('error', 'Unable to delete the booking. Please try again.');
+      return res.redirect('/bookings');
+    }
+    if (!result || !result.affectedRows) return res.status(404).send('Booking not found.');
+    req.flash('success', 'Booking deleted successfully.');
+    return res.redirect('/bookings');
+  });
+}
+
 module.exports = {
   showServicesOverview,
   listServices,
   createBooking,
-  listBookings
+  listBookings,
+  editBooking,
+  updateBooking,
+  deleteBooking
 };

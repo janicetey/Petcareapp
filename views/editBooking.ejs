@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Edit Booking | FurryTales</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --booking-yellow: #F8E7A2;
+      --booking-beige: #F7F1E5;
+      --booking-sand: #E8D5B7;
+      --booking-brown: #79502E;
+      --booking-dark: #49321F;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--booking-beige);
+      color: var(--booking-dark);
+      font-family: "Trebuchet MS", Arial, sans-serif;
+    }
+
+    .booking-panel {
+      max-width: 760px;
+      padding: clamp(1.25rem, 4vw, 2rem);
+      border: 1px solid var(--booking-sand);
+      border-radius: 1.25rem;
+      background: #fff;
+      box-shadow: 0 0.5rem 1.4rem rgb(73 50 31 / 7%);
+    }
+
+    h1,
+    .form-label {
+      color: var(--booking-dark);
+      font-weight: 800;
+    }
+
+    .form-control,
+    .form-select {
+      min-height: 46px;
+      border-color: var(--booking-sand);
+      border-radius: 0.75rem;
+      color: var(--booking-dark);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: var(--booking-brown);
+      box-shadow: 0 0 0 0.2rem rgb(121 80 46 / 16%);
+    }
+
+    .btn {
+      min-height: 44px;
+      border-radius: 0.75rem;
+      font-weight: 700;
+      transition: background-color 150ms ease, transform 150ms ease;
+    }
+
+    .btn-primary {
+      border-color: var(--booking-brown);
+      background: var(--booking-brown);
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus-visible {
+      border-color: var(--booking-dark);
+      background: var(--booking-dark);
+      transform: translateY(-1px);
+    }
+
+    .booking-summary {
+      border-radius: 0.85rem;
+      background: var(--booking-beige);
+    }
+
+    .alert {
+      border-color: var(--booking-sand);
+      color: var(--booking-dark);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .btn {
+        transition: none;
+      }
+
+      .btn:hover {
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/navbar') %>
+
+  <main class="container py-5">
+    <section class="booking-panel mx-auto" aria-labelledby="edit-booking-heading">
+      <header class="mb-4">
+        <h1 id="edit-booking-heading" class="h2 mb-2">Edit <%= bookingType === 'boarding' ? 'Pet Boarding' : 'Pet Service' %> Booking</h1>
+        <p class="mb-0">Update your booking details below.</p>
+      </header>
+
+      <% if (messages && messages.length) { %>
+        <% for (let i = 0; i < messages.length; i++) { %>
+          <div class="alert alert-success" role="status"><%= messages[i] %></div>
+        <% } %>
+      <% } %>
+      <% if (errors && errors.length) { %>
+        <% for (let i = 0; i < errors.length; i++) { %>
+          <div class="alert alert-danger" role="alert"><%= errors[i] %></div>
+        <% } %>
+      <% } %>
+
+      <form action="/bookings/<%= bookingType %>/<%= booking.booking_id %>/edit" method="POST">
+        <div class="mb-3">
+          <label for="petId" class="form-label">Pet</label>
+          <select id="petId" name="petId" class="form-select" required>
+            <option value="">Choose your pet</option>
+            <% for (let i = 0; i < pets.length; i++) { %>
+              <option value="<%= pets[i].id %>" <%= String(booking.pet_id) === String(pets[i].id) ? 'selected' : '' %>>
+                <%= pets[i].name %> (<%= pets[i].species %>)
+              </option>
+            <% } %>
+          </select>
+        </div>
+
+        <% if (bookingType === 'boarding') { %>
+          <div class="row g-3 mb-3">
+            <div class="col-12 col-md-6">
+              <label for="checkInDate" class="form-label">Check-in date</label>
+              <input id="checkInDate" name="checkInDate" type="date" class="form-control"
+                value="<%= booking.check_in_date %>" required>
+            </div>
+            <div class="col-12 col-md-6">
+              <label for="checkInTime" class="form-label">Check-in time</label>
+              <select id="checkInTime" name="checkInTime" class="form-select" required>
+                <% for (let i = 0; i < timeSlots.length; i++) { %>
+                  <option value="<%= timeSlots[i].value %>" <%= booking.check_in_time === timeSlots[i].value ? 'selected' : '' %>>
+                    <%= timeSlots[i].label %>
+                  </option>
+                <% } %>
+              </select>
+            </div>
+            <div class="col-12 col-md-6">
+              <label for="pickUpDate" class="form-label">Pick-up date</label>
+              <input id="pickUpDate" name="pickUpDate" type="date" class="form-control"
+                value="<%= booking.pick_up_date %>" required>
+              <div id="pick-up-date-help" class="form-text">Pick-up must be at least one day after check-in.</div>
+            </div>
+            <div class="col-12 col-md-6">
+              <label for="pickUpTime" class="form-label">Pick-up time</label>
+              <select id="pickUpTime" name="pickUpTime" class="form-select" required>
+                <% for (let i = 0; i < timeSlots.length; i++) { %>
+                  <option value="<%= timeSlots[i].value %>" <%= booking.pick_up_time === timeSlots[i].value ? 'selected' : '' %>>
+                    <%= timeSlots[i].label %>
+                  </option>
+                <% } %>
+              </select>
+            </div>
+          </div>
+
+          <fieldset class="mb-4">
+            <legend class="form-label">Boarding room</legend>
+            <div class="row g-3">
+              <% for (let i = 0; i < rooms.length; i++) { %>
+                <div class="col-12 col-sm-6">
+                  <label class="form-check booking-summary h-100 p-3" for="room-<%= rooms[i].key %>">
+                    <input id="room-<%= rooms[i].key %>" class="form-check-input" type="radio"
+                      name="roomKey" value="<%= rooms[i].key %>"
+                      data-nightly-cents="<%= rooms[i].nightlyRateCents %>"
+                      <%= booking.room_type === rooms[i].name ? 'checked' : '' %> required>
+                    <span class="form-check-label ms-1">
+                      <strong><%= rooms[i].name %></strong><br>
+                      S$<%= (rooms[i].nightlyRateCents / 100).toFixed(2) %> / night
+                    </span>
+                  </label>
+                </div>
+              <% } %>
+            </div>
+          </fieldset>
+
+          <div class="booking-summary p-3 mb-4" aria-live="polite">
+            <strong>Updated estimate:</strong>
+            <span id="summary-nights"><%= booking.number_of_nights %></span> night(s) &middot;
+            <span id="summary-total">S$<%= Number(booking.total_price).toFixed(2) %></span>
+          </div>
+        <% } else { %>
+          <div class="mb-4">
+            <label for="bookingDate" class="form-label">Booking date</label>
+            <input id="bookingDate" name="bookingDate" type="date" class="form-control"
+              value="<%= booking.booking_date %>" required>
+          </div>
+
+          <fieldset class="mb-4">
+            <legend class="form-label">Service</legend>
+            <div class="row g-3">
+              <% for (let i = 0; i < services.length; i++) { %>
+                <div class="col-12 col-sm-6">
+                  <label class="form-check booking-summary h-100 p-3" for="service-<%= services[i].id %>">
+                    <input id="service-<%= services[i].id %>" class="form-check-input" type="radio"
+                      name="serviceId" value="<%= services[i].id %>"
+                      <%= String(booking.service_id) === String(services[i].id) ? 'checked' : '' %> required>
+                    <span class="form-check-label ms-1">
+                      <strong><%= services[i].name %></strong><br>
+                      S$<%= Number(services[i].price).toFixed(2) %>
+                    </span>
+                  </label>
+                </div>
+              <% } %>
+            </div>
+          </fieldset>
+        <% } %>
+
+        <div class="d-flex flex-column flex-sm-row gap-2">
+          <button type="submit" class="btn btn-primary flex-grow-1">Save Changes</button>
+          <a href="/bookings" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <% if (bookingType === 'boarding') { %>
+    <script>
+      (function () {
+        const checkInDate = document.getElementById('checkInDate');
+        const pickUpDate = document.getElementById('pickUpDate');
+        const rooms = Array.from(document.querySelectorAll('input[name="roomKey"]'));
+
+        function updateEstimate() {
+          let nights = 0;
+          if (checkInDate.value && pickUpDate.value && pickUpDate.value > checkInDate.value) {
+            nights = (Date.parse(`${pickUpDate.value}T00:00:00Z`)
+              - Date.parse(`${checkInDate.value}T00:00:00Z`)) / 86400000;
+          }
+          const room = rooms.find((input) => input.checked);
+          const totalCents = room ? Number(room.dataset.nightlyCents) * nights : 0;
+          document.getElementById('summary-nights').textContent = nights > 0 ? nights : '-';
+          document.getElementById('summary-total').textContent = room && nights > 0
+            ? `S$${(totalCents / 100).toFixed(2)}`
+            : '-';
+        }
+
+        [checkInDate, pickUpDate].forEach((input) => input.addEventListener('change', updateEstimate));
+        rooms.forEach((input) => input.addEventListener('change', updateEstimate));
+        updateEstimate();
+      }());
+    </script>
+  <% } %>
+</body>
+</html>

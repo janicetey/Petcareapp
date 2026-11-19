@@ -105,6 +105,79 @@
     main .text-secondary {
       color: var(--booking-brown) !important;
     }
+
+    .booking-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      min-width: 150px;
+    }
+
+    .booking-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0.45rem 0.85rem;
+      border: 0;
+      border-radius: 0.7rem;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background-color 150ms ease, transform 150ms ease;
+    }
+
+    .booking-actions form {
+      margin: 0;
+    }
+
+    .booking-action-edit {
+      background: #37834a;
+    }
+
+    .booking-action-edit:hover,
+    .booking-action-edit:focus-visible {
+      background: #28663a;
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .booking-action-delete {
+      background: #b8423c;
+    }
+
+    .booking-action-delete:hover,
+    .booking-action-delete:focus-visible {
+      background: #91332f;
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    @media (max-width: 575.98px) {
+      .booking-actions {
+        min-width: 0;
+        flex-direction: column;
+      }
+
+      .booking-action {
+        width: 100%;
+      }
+
+      .booking-actions form {
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .booking-action {
+        transition: none;
+      }
+
+      .booking-action:hover {
+        transform: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -145,6 +218,7 @@
               <th scope="col">Price</th>
               <th scope="col">Booking Status</th>
               <th scope="col">Payment Status</th>
+              <th scope="col">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -198,6 +272,19 @@
                   <% } else { %>
                     <span class="text-secondary">No payment record</span>
                   <% } %>
+                </td>
+                <td>
+                  <% const bookingTypePath = bookings[i].booking_type === 'Pet Boarding' ? 'boarding' : 'service'; %>
+                  <div class="booking-actions">
+                    <a class="booking-action booking-action-edit"
+                      href="/bookings/<%= bookingTypePath %>/<%= bookings[i].booking_id %>/edit"
+                      aria-label="Edit booking <%= bookings[i].booking_reference || bookings[i].booking_id %>">Edit</a>
+                    <form action="/bookings/<%= bookingTypePath %>/<%= bookings[i].booking_id %>/delete"
+                      method="POST" onsubmit="return confirm('Delete this booking? This action cannot be undone.');">
+                      <button class="booking-action booking-action-delete" type="submit"
+                        aria-label="Delete booking <%= bookings[i].booking_reference || bookings[i].booking_id %>">Delete</button>
+                    </form>
+                  </div>
                 </td>
               </tr>
             <% } %>

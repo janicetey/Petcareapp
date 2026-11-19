@@ -5,6 +5,12 @@ function getActiveServices(callback) {
   connection.query(sql, callback);
 }
 
+function getServicesForBookingEdit(callback) {
+  const sql = 'SELECT id, name, price FROM services ORDER BY name ASC';
+  connection.query(sql, callback);
+}
+
 module.exports = {
-  getActiveServices
+  getActiveServices,
+  getServicesForBookingEdit
 };

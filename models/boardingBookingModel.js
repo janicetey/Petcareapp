@@ -108,6 +108,93 @@ function getBoardingBookingByReference(ownerId, bookingReference, callback) {
   connection.query(sql, [ownerId, bookingReference], callback);
 }
 
+function getBoardingBookingByIdAndOwner(ownerId, bookingId, callback) {
+  const sql = `
+    SELECT
+      bb.id AS booking_id,
+      bb.pet_id,
+      bb.booking_reference,
+      DATE_FORMAT(bb.check_in_date, '%Y-%m-%d') AS check_in_date,
+      DATE_FORMAT(bb.check_in_time, '%H:%i') AS check_in_time,
+      DATE_FORMAT(bb.pick_up_date, '%Y-%m-%d') AS pick_up_date,
+      DATE_FORMAT(bb.pick_up_time, '%H:%i') AS pick_up_time,
+      bb.number_of_nights,
+      bb.price_per_night,
+      bb.total_price,
+      bb.room_type,
+      bb.booking_status
+    FROM boarding_bookings bb
+    JOIN pets p ON p.id = bb.pet_id AND p.owner_id = bb.user_id
+    WHERE bb.user_id = ? AND bb.id = ?
+    LIMIT 1
+  `;
+  connection.query(sql, [ownerId, bookingId], callback);
+}
+
+function updateBoardingBooking(ownerId, bookingId, booking, callback) {
+  const room = getRoom(booking.roomKey);
+  const petId = Number(booking.petId);
+  if (!room
+    || !Number.isInteger(petId)
+    || petId < 1
+    || !isValidDateString(booking.checkInDate)
+    || !isValidDateString(booking.pickUpDate)
+    || booking.pickUpDate <= booking.checkInDate
+    || !TIME_SLOTS.some((slot) => slot.value === booking.checkInTime)
+    || !TIME_SLOTS.some((slot) => slot.value === booking.pickUpTime)) {
+    return callback(null, null);
+  }
+
+  const numberOfNights = getNights(booking.checkInDate, booking.pickUpDate);
+  if (!Number.isInteger(numberOfNights) || numberOfNights < 1) {
+    return callback(null, null);
+  }
+
+  const bookingSql = 'SELECT id FROM boarding_bookings WHERE id = ? AND user_id = ? LIMIT 1';
+  connection.query(bookingSql, [bookingId, ownerId], (bookingError, bookingRows) => {
+    if (bookingError) return callback(bookingError);
+    if (!bookingRows || !bookingRows.length) return callback(null, null);
+
+    const petSql = 'SELECT id FROM pets WHERE id = ? AND owner_id = ? LIMIT 1';
+    connection.query(petSql, [petId, ownerId], (petError, petRows) => {
+      if (petError) return callback(petError);
+      if (!petRows || !petRows.length) return callback(null, { invalid: true });
+
+      const pricePerNight = (room.nightlyRateCents / 100).toFixed(2);
+      const totalPrice = ((room.nightlyRateCents * numberOfNights) / 100).toFixed(2);
+      const updateSql = `
+        UPDATE boarding_bookings
+        SET pet_id = ?, room_type = ?, check_in_date = ?, check_in_time = ?,
+            pick_up_date = ?, pick_up_time = ?, number_of_nights = ?,
+            price_per_night = ?, total_price = ?
+        WHERE id = ? AND user_id = ?
+      `;
+      const values = [
+        petId,
+        room.name,
+        booking.checkInDate,
+        `${booking.checkInTime}:00`,
+        booking.pickUpDate,
+        `${booking.pickUpTime}:00`,
+        numberOfNights,
+        pricePerNight,
+        totalPrice,
+        bookingId,
+        ownerId
+      ];
+      connection.query(updateSql, values, (updateError) => {
+        if (updateError) return callback(updateError);
+        callback(null, { success: true });
+      });
+    });
+  });
+}
+
+function deleteBoardingBooking(ownerId, bookingId, callback) {
+  const sql = 'DELETE FROM boarding_bookings WHERE id = ? AND user_id = ?';
+  connection.query(sql, [bookingId, ownerId], callback);
+}
+
 function createPendingBooking(ownerId, booking, callback) {
   const room = getRoom(booking.roomKey);
   if (!room
@@ -221,6 +308,9 @@ module.exports = {
   createPendingBooking,
   getBoardingBookingsByOwner,
   getBoardingBookingByReference,
+  getBoardingBookingByIdAndOwner,
+  updateBoardingBooking,
+  deleteBoardingBooking,
   isValidDateString,
   getNights,
   getTodayString
