@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Book a Pet Service</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Page-local FurryTales colors preserve the existing booking layout and controls. */
+    :root {
+      --service-yellow: #F8E7A2;
+      --service-beige: #F7F1E5;
+      --service-sand: #E8D5B7;
+      --service-brown: #79502E;
+      --service-dark: #49321F;
+    }
+
+    body {
+      background: var(--service-beige);
+      color: var(--service-dark);
+    }
+
+    main h1,
+    main .form-label,
+    main legend {
+      color: var(--service-dark);
+    }
+
+    main .text-secondary {
+      color: var(--service-brown) !important;
+    }
+
+    main .form-control,
+    main .form-select {
+      border-color: var(--service-sand);
+      background-color: #fff;
+      color: var(--service-dark);
+    }
+
+    main .form-control:focus,
+    main .form-select:focus {
+      border-color: var(--service-brown);
+      box-shadow: 0 0 0 0.2rem rgb(121 80 46 / 16%);
+    }
+
+    main .form-check-input {
+      border-color: var(--service-brown);
+      accent-color: var(--service-brown);
+    }
+
+    main .card {
+      border-color: var(--service-sand);
+      background: #fff;
+      color: var(--service-dark);
+      cursor: pointer;
+      transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    main .card:hover,
+    main .card:focus-within {
+      border-color: var(--service-brown);
+      box-shadow: 0 0.35rem 1rem rgb(73 50 31 / 10%);
+    }
+
+    main .card:has(.form-check-input:checked) {
+      border-color: var(--service-brown);
+      background: var(--service-yellow);
+    }
+
+    main .btn-primary {
+      border-color: var(--service-brown);
+      background: var(--service-brown);
+      color: #fff;
+    }
+
+    main .btn-primary:hover,
+    main .btn-primary:focus-visible {
+      border-color: var(--service-dark);
+      background: var(--service-dark);
+      color: #fff;
+    }
+
+    main .btn-outline-secondary {
+      border-color: var(--service-sand);
+      color: var(--service-brown);
+    }
+
+    main .btn-outline-secondary:hover,
+    main .btn-outline-secondary:focus-visible {
+      border-color: var(--service-sand);
+      background: var(--service-sand);
+      color: var(--service-dark);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      main .card {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/navbar') %>
+
+  <main class="container py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+      <h1 class="h2 mb-0">Book a Pet Service</h1>
+      <a href="/bookings" class="btn btn-outline-secondary">View Booking History</a>
+    </div>
+
+    <% if (messages && messages.length) { %>
+      <% for (let i = 0; i < messages.length; i++) { %>
+        <div class="alert alert-success" role="status"><%= messages[i] %></div>
+      <% } %>
+    <% } %>
+    <% if (errors && errors.length) { %>
+      <% for (let i = 0; i < errors.length; i++) { %>
+        <div class="alert alert-danger" role="alert"><%= errors[i] %></div>
+      <% } %>
+    <% } %>
+
+    <% if (!pets.length) { %>
+      <div class="alert alert-info">
+        Add a pet before booking a service. <a href="/pets/new">Add a pet</a>
+      </div>
+    <% } else if (!services.length) { %>
+      <div class="alert alert-info">There are no services available to book right now.</div>
+    <% } else { %>
+      <form action="/services/book" method="POST">
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label for="petId" class="form-label">Pet</label>
+            <select id="petId" name="petId" class="form-select" required>
+              <option value="">Select a pet</option>
+              <% for (let i = 0; i < pets.length; i++) { %>
+                <option value="<%= pets[i].id %>" <%= selectedPetId === String(pets[i].id) ? 'selected' : '' %>>
+                  <%= pets[i].name %> (<%= pets[i].species %>)
+                </option>
+              <% } %>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="bookingDate" class="form-label">Booking date</label>
+            <input id="bookingDate" name="bookingDate" type="date" class="form-control"
+              min="<%= today %>" value="<%= today %>" required>
+          </div>
+        </div>
+
+        <fieldset class="mb-4">
+          <legend class="h5 mb-3">Choose a service</legend>
+          <div class="row g-3">
+            <% for (let i = 0; i < services.length; i++) { %>
+              <div class="col-md-6 col-lg-4">
+                <label class="card h-100 p-3" for="service-<%= services[i].id %>">
+                  <div class="d-flex align-items-start gap-3">
+                    <input class="form-check-input mt-1" id="service-<%= services[i].id %>"
+                      type="radio" name="serviceId" value="<%= services[i].id %>" required>
+                    <span class="d-flex justify-content-between align-items-start gap-3 w-100">
+                      <span class="fw-semibold"><%= services[i].name %></span>
+                      <span class="text-nowrap">S$<%= Number(services[i].price).toFixed(2) %></span>
+                    </span>
+                  </div>
+                </label>
+              </div>
+            <% } %>
+          </div>
+        </fieldset>
+
+        <p class="text-secondary">Bookings and payments are recorded as pending. No payment is processed here.</p>
+        <button type="submit" class="btn btn-primary">Create booking</button>
+      </form>
+    <% } %>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

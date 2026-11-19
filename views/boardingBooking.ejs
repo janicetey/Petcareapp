@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Book a Pet Boarding Stay | FurryTales</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* FurryTales booking form colors and responsive cards match the boarding rooms page. */
+    :root {
+      --boarding-yellow: #F8E7A2;
+      --boarding-beige: #F7F1E5;
+      --boarding-sand: #E8D5B7;
+      --boarding-brown: #79502E;
+      --boarding-dark: #49321F;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--boarding-beige);
+      color: var(--boarding-dark);
+      font-family: "Trebuchet MS", Arial, sans-serif;
+    }
+
+    .booking-main {
+      max-width: 1000px;
+    }
+
+    .booking-heading {
+      color: var(--boarding-dark);
+      font-size: clamp(2rem, 4vw, 2.6rem);
+      font-weight: 800;
+    }
+
+    .booking-subheading {
+      color: var(--boarding-brown);
+    }
+
+    .booking-panel,
+    .summary-panel {
+      padding: clamp(1.2rem, 3vw, 2rem);
+      border: 1px solid rgb(121 80 46 / 12%);
+      border-radius: 1.3rem;
+      background: #fff;
+      box-shadow: 0 0.6rem 1.6rem rgb(73 50 31 / 7%);
+    }
+
+    .booking-panel h2,
+    .summary-panel h2 {
+      color: var(--boarding-dark);
+      font-size: 1.35rem;
+      font-weight: 800;
+    }
+
+    .form-label {
+      color: var(--boarding-dark);
+      font-weight: 700;
+    }
+
+    .form-control,
+    .form-select {
+      min-height: 46px;
+      border-color: var(--boarding-sand);
+      border-radius: 0.75rem;
+      background-color: #fff;
+      color: var(--boarding-dark);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: var(--boarding-brown);
+      box-shadow: 0 0 0 0.2rem rgb(121 80 46 / 16%);
+    }
+
+    .room-option {
+      position: relative;
+      display: block;
+      height: 100%;
+      padding: 1.2rem;
+      border: 2px solid var(--boarding-sand);
+      border-radius: 1rem;
+      background: #fff;
+      cursor: pointer;
+      transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+    }
+
+    .room-option:has(input:checked) {
+      border-color: var(--boarding-brown);
+      background: var(--boarding-yellow);
+      box-shadow: 0 0.3rem 0.9rem rgb(73 50 31 / 10%);
+    }
+
+    .room-option:focus-within {
+      outline: 3px solid rgb(121 80 46 / 25%);
+      outline-offset: 2px;
+    }
+
+    .room-option input {
+      accent-color: var(--boarding-brown);
+    }
+
+    .room-option h3 {
+      margin: 0;
+      color: var(--boarding-dark);
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    .room-price {
+      color: var(--boarding-brown);
+      font-size: 1.15rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .room-description {
+      margin: 0.9rem 0 0;
+      color: #66513d;
+      line-height: 1.65;
+    }
+
+    .summary-panel {
+      position: sticky;
+      top: 1rem;
+      background: #fffdf8;
+    }
+
+    .summary-list {
+      margin: 0;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.65rem 0;
+      border-bottom: 1px solid var(--boarding-sand);
+    }
+
+    .summary-row dt {
+      margin: 0;
+      color: #66513d;
+      font-weight: 500;
+    }
+
+    .summary-row dd {
+      margin: 0;
+      color: var(--boarding-dark);
+      font-weight: 700;
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+
+    .summary-total {
+      margin-top: 0.45rem;
+      padding-top: 0.9rem;
+      border-top: 2px solid var(--boarding-sand);
+      color: var(--boarding-dark);
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    .booking-submit {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: 0;
+      border-radius: 999px;
+      background: var(--boarding-brown);
+      color: #fff;
+      font-weight: 800;
+      transition: background-color 150ms ease, transform 150ms ease;
+    }
+
+    .booking-submit:hover,
+    .booking-submit:focus-visible {
+      transform: translateY(-2px);
+      background: var(--boarding-dark);
+      color: #fff;
+    }
+
+    .booking-submit:disabled {
+      background: #9c8875;
+      cursor: not-allowed;
+    }
+
+    .booking-alert {
+      border-color: var(--boarding-sand);
+      background: #fff9e8;
+      color: var(--boarding-dark);
+    }
+
+    @media (max-width: 767.98px) {
+      .summary-panel {
+        position: static;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .room-option,
+      .booking-submit {
+        transition: none;
+      }
+
+      .booking-submit:hover {
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/navbar') %>
+
+  <main class="container booking-main py-5">
+    <header class="mb-4 text-center">
+      <h1 class="booking-heading">Book Your Pet's Stay</h1>
+      <p class="booking-subheading mb-0">Choose their room and the dates that work for your trip.</p>
+    </header>
+
+    <% if (errors && errors.length) { %>
+      <% for (let i = 0; i < errors.length; i++) { %>
+        <div class="alert booking-alert" role="alert"><%= errors[i] %></div>
+      <% } %>
+    <% } %>
+
+    <% if (!pets.length) { %>
+      <div class="alert booking-alert" role="status">
+        Register a pet before making a boarding booking. <a href="/pets/new" class="link-dark">Add a pet</a>
+      </div>
+    <% } %>
+
+    <form id="boarding-booking-form" action="/boarding/book" method="POST">
+      <input type="hidden" name="submissionToken" value="<%= submissionToken %>">
+      <div class="row g-4">
+        <div class="col-12 col-lg-7">
+          <section class="booking-panel mb-4" aria-labelledby="stay-details-heading">
+            <h2 id="stay-details-heading" class="mb-3">Stay details</h2>
+            <div class="mb-3">
+              <label for="petId" class="form-label">Select Your Pet</label>
+              <select id="petId" name="petId" class="form-select" required <%= pets.length ? '' : 'disabled' %>>
+                <option value="">Choose your pet</option>
+                <% for (let i = 0; i < pets.length; i++) { %>
+                  <option value="<%= pets[i].id %>"><%= pets[i].name %> (<%= pets[i].species %>)</option>
+                <% } %>
+              </select>
+            </div>
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label for="checkInDate" class="form-label">Check-in Date</label>
+                <input id="checkInDate" name="checkInDate" type="date" class="form-control" min="<%= today %>" required>
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="checkInTime" class="form-label">Check-in Time</label>
+                <select id="checkInTime" name="checkInTime" class="form-select" required>
+                  <option value="">Choose time</option>
+                  <% for (let i = 0; i < timeSlots.length; i++) { %>
+                    <option value="<%= timeSlots[i].value %>"><%= timeSlots[i].label %></option>
+                  <% } %>
+                </select>
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="pickUpDate" class="form-label">Pick-up Date</label>
+                <input id="pickUpDate" name="pickUpDate" type="date" class="form-control" min="<%= today %>" required>
+                <div id="pick-up-date-help" class="form-text">Pick-up must be at least one day after check-in.</div>
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="pickUpTime" class="form-label">Pick-up Time</label>
+                <select id="pickUpTime" name="pickUpTime" class="form-select" required>
+                  <option value="">Choose time</option>
+                  <% for (let i = 0; i < timeSlots.length; i++) { %>
+                    <option value="<%= timeSlots[i].value %>"><%= timeSlots[i].label %></option>
+                  <% } %>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <fieldset class="booking-panel">
+            <legend class="mb-3"><span class="h2">Choose Your Boarding Room</span></legend>
+            <div class="row g-3">
+              <% for (let i = 0; i < rooms.length; i++) { %>
+                <div class="col-12">
+                  <label class="room-option" for="room-<%= rooms[i].key %>">
+                    <div class="d-flex align-items-start gap-3">
+                      <input id="room-<%= rooms[i].key %>" type="radio" name="roomKey" value="<%= rooms[i].key %>" data-nightly-cents="<%= rooms[i].nightlyRateCents %>" required>
+                      <div class="w-100">
+                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                          <h3><%= rooms[i].name %></h3>
+                          <span class="room-price">S$<%= (rooms[i].nightlyRateCents / 100).toFixed(2) %> / night</span>
+                        </div>
+                        <p class="room-description">
+                          <%= rooms[i].dimensions %> &middot; <%= rooms[i].area %><br>
+                          Suitable for: <%= rooms[i].suitableFor %>
+                        </p>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              <% } %>
+            </div>
+          </fieldset>
+        </div>
+
+        <div class="col-12 col-lg-5">
+          <aside class="summary-panel" aria-labelledby="summary-heading">
+            <h2 id="summary-heading" class="mb-3">Booking Summary</h2>
+            <dl class="summary-list">
+              <div class="summary-row"><dt>Pet</dt><dd id="summary-pet">Not selected</dd></div>
+              <div class="summary-row"><dt>Room type</dt><dd id="summary-room">Not selected</dd></div>
+              <div class="summary-row"><dt>Check-in</dt><dd id="summary-check-in">Not selected</dd></div>
+              <div class="summary-row"><dt>Pick-up</dt><dd id="summary-pick-up">Not selected</dd></div>
+              <div class="summary-row"><dt>Number of nights</dt><dd id="summary-nights">-</dd></div>
+              <div class="summary-row"><dt>Price per night</dt><dd id="summary-rate">-</dd></div>
+            </dl>
+            <p class="summary-total d-flex justify-content-between mb-3">
+              <span>Total price</span>
+              <span id="summary-total">-</span>
+            </p>
+            <button class="booking-submit" type="submit" <%= pets.length ? '' : 'disabled' %>>Confirm Boarding Booking</button>
+            <p class="form-text mt-3 mb-0">Your booking will be recorded as pending for approval.</p>
+          </aside>
+        </div>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    /* Update the visible estimate and summary; the server recalculates all booking prices. */
+    (function () {
+      const form = document.getElementById('boarding-booking-form');
+      const pet = document.getElementById('petId');
+      const checkInDate = document.getElementById('checkInDate');
+      const pickUpDate = document.getElementById('pickUpDate');
+      const checkInTime = document.getElementById('checkInTime');
+      const pickUpTime = document.getElementById('pickUpTime');
+      const roomInputs = Array.from(form.querySelectorAll('input[name="roomKey"]'));
+      const submitButton = form.querySelector('button[type="submit"]');
+      const dateHelp = document.getElementById('pick-up-date-help');
+      const roomPrices = new Map(roomInputs.map((input) => [input.value, Number(input.dataset.nightlyCents)]));
+
+      function formatDate(value) {
+        if (!value) return 'Not selected';
+        const parts = value.split('-').map(Number);
+        return new Date(Date.UTC(parts[0], parts[1] - 1, parts[2])).toLocaleDateString('en-SG', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          timeZone: 'UTC'
+        });
+      }
+
+      function formatMoney(cents) {
+        return `S$${(cents / 100).toFixed(2)}`;
+      }
+
+      function updatePickUpMinimum() {
+        if (!checkInDate.value) {
+          pickUpDate.min = checkInDate.min;
+          dateHelp.textContent = 'Pick-up must be at least one day after check-in.';
+          return;
+        }
+
+        const [year, month, day] = checkInDate.value.split('-').map(Number);
+        const nextDay = new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10);
+        pickUpDate.min = nextDay;
+        dateHelp.textContent = `Choose ${formatDate(nextDay)} or later.`;
+        if (pickUpDate.value && pickUpDate.value < nextDay) {
+          pickUpDate.value = '';
+          updateSummary();
+        }
+      }
+
+      function updateSummary() {
+        const selectedRoom = roomInputs.find((input) => input.checked);
+        const nightlyCents = selectedRoom ? roomPrices.get(selectedRoom.value) : 0;
+        let nights = 0;
+
+        if (checkInDate.value && pickUpDate.value && pickUpDate.value > checkInDate.value) {
+          const firstNight = Date.parse(`${checkInDate.value}T00:00:00Z`);
+          const lastNight = Date.parse(`${pickUpDate.value}T00:00:00Z`);
+          nights = (lastNight - firstNight) / 86400000;
+        }
+
+        const petOption = pet.options[pet.selectedIndex];
+        document.getElementById('summary-pet').textContent = pet.value ? petOption.textContent.trim() : 'Not selected';
+        document.getElementById('summary-room').textContent = selectedRoom
+          ? selectedRoom.closest('.room-option').querySelector('h3').textContent
+          : 'Not selected';
+        document.getElementById('summary-check-in').textContent = checkInDate.value
+          ? `${formatDate(checkInDate.value)}${checkInTime.value ? `, ${checkInTime.options[checkInTime.selectedIndex].text}` : ''}`
+          : 'Not selected';
+        document.getElementById('summary-pick-up').textContent = pickUpDate.value
+          ? `${formatDate(pickUpDate.value)}${pickUpTime.value ? `, ${pickUpTime.options[pickUpTime.selectedIndex].text}` : ''}`
+          : 'Not selected';
+        document.getElementById('summary-nights').textContent = nights > 0 ? `${nights}` : '-';
+        document.getElementById('summary-rate').textContent = selectedRoom ? `${formatMoney(nightlyCents)} / night` : '-';
+        document.getElementById('summary-total').textContent = selectedRoom && nights > 0
+          ? formatMoney(nightlyCents * nights)
+          : '-';
+      }
+
+      [pet, checkInDate, pickUpDate, checkInTime, pickUpTime].forEach((input) => {
+        input.addEventListener('change', updateSummary);
+      });
+      checkInDate.addEventListener('change', updatePickUpMinimum);
+      roomInputs.forEach((input) => input.addEventListener('change', updateSummary));
+      form.addEventListener('submit', () => {
+        if (form.reportValidity()) submitButton.disabled = true;
+      });
+
+      updatePickUpMinimum();
+      updateSummary();
+    }());
+  </script>
+</body>
+</html>

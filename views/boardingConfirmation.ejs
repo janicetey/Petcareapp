@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Boarding Booking Confirmed | FurryTales</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Confirmation uses the FurryTales palette and is rendered only from a saved booking. */
+    :root {
+      --boarding-yellow: #F8E7A2;
+      --boarding-beige: #F7F1E5;
+      --boarding-sand: #E8D5B7;
+      --boarding-brown: #79502E;
+      --boarding-dark: #49321F;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--boarding-beige);
+      color: var(--boarding-dark);
+      font-family: "Trebuchet MS", Arial, sans-serif;
+    }
+
+    .confirmation-panel {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: clamp(1.3rem, 4vw, 2.5rem);
+      border: 1px solid rgb(121 80 46 / 12%);
+      border-radius: 1.4rem;
+      background: #fff;
+      box-shadow: 0 0.7rem 1.8rem rgb(73 50 31 / 8%);
+    }
+
+    .confirmation-title {
+      color: var(--boarding-dark);
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      font-weight: 800;
+    }
+
+    .confirmation-reference {
+      display: inline-block;
+      padding: 0.5rem 0.9rem;
+      border-radius: 999px;
+      background: var(--boarding-yellow);
+      color: var(--boarding-dark);
+      font-weight: 800;
+    }
+
+    .confirmation-list {
+      margin: 1.5rem 0;
+    }
+
+    .confirmation-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.7rem 0;
+      border-bottom: 1px solid var(--boarding-sand);
+    }
+
+    .confirmation-row dt {
+      margin: 0;
+      color: #66513d;
+      font-weight: 500;
+    }
+
+    .confirmation-row dd {
+      margin: 0;
+      color: var(--boarding-dark);
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .confirmation-total {
+      color: var(--boarding-dark);
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .confirmation-button {
+      display: inline-block;
+      padding: 0.75rem 1.3rem;
+      border-radius: 999px;
+      background: var(--boarding-brown);
+      color: #fff;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .confirmation-button:hover,
+    .confirmation-button:focus-visible {
+      background: var(--boarding-dark);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/navbar') %>
+
+  <main class="container py-5">
+    <section class="confirmation-panel">
+      <header class="text-center">
+        <p class="mb-2" role="status">Your boarding booking has been saved.</p>
+        <h1 class="confirmation-title">Booking Request Received</h1>
+        <p class="mb-2">Booking reference</p>
+        <p class="confirmation-reference"><%= booking.booking_reference %></p>
+      </header>
+
+      <dl class="confirmation-list">
+        <div class="confirmation-row"><dt>Booking type</dt><dd>Pet Boarding</dd></div>
+        <div class="confirmation-row"><dt>Pet</dt><dd><%= booking.pet_name %></dd></div>
+        <div class="confirmation-row"><dt>Room type</dt><dd><%= booking.room_type %></dd></div>
+        <div class="confirmation-row"><dt>Check-in</dt><dd><%= booking.check_in_date %> at <%= booking.check_in_time %></dd></div>
+        <div class="confirmation-row"><dt>Pick-up</dt><dd><%= booking.pick_up_date %> at <%= booking.pick_up_time %></dd></div>
+        <div class="confirmation-row"><dt>Number of nights</dt><dd><%= booking.number_of_nights %></dd></div>
+        <div class="confirmation-row"><dt>Price per night</dt><dd>S$<%= Number(booking.price_per_night).toFixed(2) %></dd></div>
+        <div class="confirmation-row"><dt>Booking status</dt><dd><%= booking.booking_status %></dd></div>
+      </dl>
+
+      <p class="confirmation-total d-flex justify-content-between">
+        <span>Total price</span>
+        <span>S$<%= Number(booking.total_price).toFixed(2) %></span>
+      </p>
+      <p class="text-secondary">Your request is pending approval.</p>
+      <a class="confirmation-button" href="/bookings">Return to Bookings</a>
+    </section>
+  </main>
+</body>
+</html>

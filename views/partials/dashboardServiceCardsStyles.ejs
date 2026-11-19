@@ -1,0 +1,89 @@
+<style>
+  /* Shared styles keep the dashboard and Services overview cards visually identical. */
+  :root {
+    --pastel-yellow: #F8E7A2;
+    --light-beige: #F7F1E5;
+    --sand-beige: #E8D5B7;
+    --chocolate-brown: #79502E;
+    --dark-brown: #49321F;
+  }
+
+  .dashboard-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 190px;
+    padding: 1.4rem;
+    border-radius: 1.1rem;
+    box-shadow: 0 0.5rem 1.5rem rgb(73 50 31 / 8%);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+
+  .dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0.9rem 1.8rem rgb(73 50 31 / 14%);
+  }
+
+  .dashboard-card-service {
+    background: var(--pastel-yellow);
+  }
+
+  .dashboard-card-boarding {
+    background: var(--sand-beige);
+  }
+
+  .dashboard-card-journal {
+    background: #fff;
+  }
+
+  .dashboard-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    margin-bottom: 0.9rem;
+    color: var(--chocolate-brown);
+  }
+
+  .dashboard-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .dashboard-card h2 {
+    margin-bottom: 0.55rem;
+    color: var(--dark-brown);
+    font-size: 1.3rem;
+    font-weight: 800;
+  }
+
+  .dashboard-card p {
+    flex-grow: 1;
+    margin-bottom: 0.8rem;
+    color: #66513d;
+    line-height: 1.6;
+  }
+
+  .dashboard-card a {
+    align-self: flex-start;
+    color: var(--chocolate-brown);
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .dashboard-card a:hover,
+  .dashboard-card a:focus-visible {
+    color: var(--dark-brown);
+    text-decoration: underline;
+    text-underline-offset: 0.2rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dashboard-card {
+      transition: none;
+    }
+
+    .dashboard-card:hover {
+      transform: none;
+    }
+  }
+</style>

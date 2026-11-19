@@ -1,0 +1,130 @@
+<!-- Shared navigation styling keeps the logo, links, and mobile menu consistent across pages. -->
+<style>
+  .furrytales-navbar {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #E8D5B7;
+    background: #F7F1E5;
+  }
+
+  .furrytales-navbar .navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    color: #49321F;
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  .furrytales-navbar .navbar-brand:hover,
+  .furrytales-navbar .navbar-brand:focus-visible {
+    color: #79502E;
+  }
+
+  .furrytales-logo {
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: 0.7rem;
+    object-fit: contain;
+  }
+
+  .furrytales-navbar .nav-link {
+    padding: 0.55rem 0.8rem;
+    color: #49321F;
+    font-weight: 600;
+  }
+
+  .furrytales-navbar .nav-link:hover,
+  .furrytales-navbar .nav-link:focus-visible {
+    color: #79502E;
+  }
+
+  .furrytales-navbar .nav-link.active {
+    color: #79502E;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.35rem;
+  }
+
+  .furrytales-navbar .furrytales-signup {
+    padding-right: 1rem;
+    padding-left: 1rem;
+    border-radius: 999px;
+    background: #79502E;
+    color: #fff;
+  }
+
+  .furrytales-navbar .furrytales-signup:hover,
+  .furrytales-navbar .furrytales-signup:focus-visible {
+    background: #49321F;
+    color: #fff;
+  }
+
+  .furrytales-navbar .navbar-toggler {
+    border-color: #79502E;
+  }
+
+  .furrytales-navbar .navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem rgb(121 80 46 / 20%);
+  }
+
+  @media (max-width: 991.98px) {
+    .furrytales-navbar .navbar-collapse {
+      padding-top: 0.75rem;
+    }
+
+    .furrytales-navbar .nav-link {
+      padding: 0.65rem 0.25rem;
+    }
+  }
+</style>
+
+<!-- Shared header preserves all existing auth, admin, booking, and journal destinations. -->
+<nav class="navbar navbar-expand-lg furrytales-navbar" aria-label="Main navigation">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <img class="furrytales-logo" src="/images/furrytales-logo.png" alt="">
+      <span>FurryTales</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+        <% if (session && session.user) { %>
+          <% if (session.user.role === 'admin') { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/admin/users">View Users</a>
+            </li>
+          <% } %>
+          
+          <li class="nav-item">
+            <a class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'services' ? 'active' : '' %>" href="/services/overview" aria-current="<%= typeof activePage !== 'undefined' && activePage === 'services' ? 'page' : 'false' %>">Services</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/bookings">Bookings</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/journals">Journals</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/logout">Logout</a>
+          </li>
+          <li class="nav-item">
+            <span class="nav-link">Logged in as: <strong><%= session.user.name %></strong></span>
+          </li>
+        <% } else { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/login">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link furrytales-signup" href="/signup">Sign Up</a>
+          </li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>
+<!-- Bootstrap's bundle powers the responsive collapse toggle already used by the shared header. -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

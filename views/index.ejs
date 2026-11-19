@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FurryTales | Pet Care Made Special</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <%- include('partials/dashboardServiceCardsStyles') %>
+  <style>
+    /* Homepage styles use the FurryTales palette and keep the layout responsive. */
+    body {
+      min-height: 100vh;
+      background: var(--light-beige);
+      color: var(--dark-brown);
+      font-family: "Trebuchet MS", Arial, sans-serif;
+    }
+
+    .home-hero {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      padding: clamp(4rem, 9vw, 7rem) 1rem clamp(3.5rem, 7vw, 5rem);
+      background: linear-gradient(135deg, #fffdf8 0%, var(--light-beige) 72%, #f5e9d2 100%);
+      text-align: center;
+    }
+
+    .home-hero::before,
+    .home-hero::after {
+      position: absolute;
+      z-index: -1;
+      border-radius: 50%;
+      content: "";
+    }
+
+    .home-hero::before {
+      top: -5rem;
+      left: -4rem;
+      width: 15rem;
+      height: 15rem;
+      background: rgb(248 231 162 / 35%);
+    }
+
+    .home-hero::after {
+      right: -3rem;
+      bottom: -7rem;
+      width: 19rem;
+      height: 19rem;
+      background: rgb(232 213 183 / 38%);
+    }
+
+    .hero-content {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    .hero-eyebrow {
+      display: inline-block;
+      margin-bottom: 1rem;
+      padding: 0.45rem 0.9rem;
+      border: 1px solid var(--sand-beige);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--chocolate-brown);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .home-hero h1 {
+      margin-bottom: 0.7rem;
+      color: var(--dark-brown);
+      font-size: clamp(2.4rem, 6vw, 4.25rem);
+      font-weight: 800;
+      letter-spacing: -0.045em;
+    }
+
+    .hero-subheading {
+      margin-bottom: 1rem;
+      color: var(--chocolate-brown);
+      font-size: clamp(1.2rem, 3vw, 1.65rem);
+      font-weight: 600;
+    }
+
+    .hero-description {
+      max-width: 680px;
+      margin: 0 auto;
+      color: #66513d;
+      font-size: 1.08rem;
+      line-height: 1.8;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.85rem;
+      margin-top: 2rem;
+    }
+
+    .furrytales-button {
+      min-width: 180px;
+      padding: 0.8rem 1.25rem;
+      border: 2px solid var(--chocolate-brown);
+      border-radius: 999px;
+      background: var(--chocolate-brown);
+      color: #fff;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    .furrytales-button:hover,
+    .furrytales-button:focus-visible {
+      transform: translateY(-2px);
+      background: var(--dark-brown);
+      color: #fff;
+    }
+
+    .furrytales-button-secondary {
+      background: transparent;
+      color: var(--chocolate-brown);
+    }
+
+    .furrytales-button-secondary:hover,
+    .furrytales-button-secondary:focus-visible {
+      background: var(--pastel-yellow);
+      color: var(--dark-brown);
+    }
+
+    .features-section {
+      padding: clamp(3rem, 7vw, 5rem) 0;
+    }
+
+    .features-heading {
+      margin-bottom: 0.65rem;
+      color: var(--dark-brown);
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .features-intro {
+      margin: 0 auto 2.25rem;
+      color: #66513d;
+      text-align: center;
+    }
+
+    .feature-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 2rem;
+      border: 1px solid rgb(121 80 46 / 10%);
+      border-radius: 1.25rem;
+      background: #fff;
+      box-shadow: 0 0.6rem 1.8rem rgb(73 50 31 / 7%);
+      transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 1rem 2.2rem rgb(73 50 31 / 13%);
+    }
+
+    .feature-icon {
+      display: grid;
+      width: 3.5rem;
+      height: 3.5rem;
+      margin-bottom: 1.25rem;
+      place-items: center;
+      border-radius: 1rem;
+      background: var(--pastel-yellow);
+      color: var(--chocolate-brown);
+    }
+
+    .feature-icon svg {
+      width: 1.75rem;
+      height: 1.75rem;
+    }
+
+    .feature-card h3 {
+      margin-bottom: 0.75rem;
+      color: var(--chocolate-brown);
+      font-size: 1.35rem;
+      font-weight: 800;
+    }
+
+    .feature-card p {
+      flex-grow: 1;
+      min-height: 5rem;
+      margin-bottom: 1.35rem;
+      color: #66513d;
+      line-height: 1.7;
+    }
+
+    .feature-link {
+      color: var(--chocolate-brown);
+      font-weight: 700;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.2rem;
+    }
+
+    .feature-link:hover,
+    .feature-link:focus-visible {
+      color: var(--dark-brown);
+    }
+
+    /* Signed-in users get the screenshot-inspired dashboard with role-neutral feature cards. */
+    .dashboard-home {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: clamp(2rem, 5vw, 3.5rem) 1rem;
+    }
+
+    .dashboard-intro {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .dashboard-eyebrow {
+      display: inline-block;
+      margin-bottom: 0.8rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      background: #f2dfcc;
+      color: var(--chocolate-brown);
+      font-weight: 700;
+    }
+
+    .dashboard-title {
+      margin-bottom: 0.55rem;
+      color: var(--dark-brown);
+      font-size: clamp(2rem, 4vw, 2.7rem);
+      font-weight: 800;
+    }
+
+    .dashboard-subtitle {
+      margin-bottom: 0.75rem;
+      color: var(--chocolate-brown);
+      font-size: clamp(1.15rem, 2.5vw, 1.45rem);
+    }
+
+    .dashboard-description {
+      max-width: 880px;
+      margin: 0 auto;
+      color: #66513d;
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .furrytales-button,
+      .feature-card {
+        transition: none;
+      }
+
+      .furrytales-button:hover,
+      .feature-card:hover {
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/navbar') %>
+
+  <main>
+    <% if (session && session.user) { %>
+      <!-- Signed-in homepage welcomes the user and gives direct access to services, boarding, and journals. -->
+      <section class="dashboard-home">
+        <header class="dashboard-intro">
+          <span class="dashboard-eyebrow">Your pet's happy place</span>
+          <h1 class="dashboard-title">Welcome to FurryTales!</h1>
+          <p class="dashboard-subtitle">Every Pet Has a Story. Let's Make It Special.</p>
+          <p class="dashboard-description">
+            Manage your pet's health, book care services and find a comfortable stay for your furry companions.
+          </p>
+        </header>
+
+        <!-- The first two cards share a row; the journal card spans the full width below. -->
+        <div class="row g-4">
+          <%- include('partials/dashboardServiceCards') %>
+          <div class="col-12">
+            <article class="dashboard-card dashboard-card-journal">
+              <div class="dashboard-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 3.5h10.5A2.5 2.5 0 0 1 19 6v14.5H7A3 3 0 0 1 4 17.5v-11a3 3 0 0 1 2-3Z"></path>
+                  <path d="M7 17.5h12M8 8h7"></path>
+                  <path d="m12 13.2-.8-.7a1 1 0 0 0-1.4 1.4l2.2 2.1 2.2-2.1a1 1 0 0 0-1.4-1.4Z"></path>
+                </svg>
+              </div>
+              <h2>Pet Care Journal</h2>
+              <p>Keep track of your pets' health, activities and important records.</p>
+              <a href="/journals">View Journal <span aria-hidden="true">&rarr;</span></a>
+            </article>
+          </div>
+        </div>
+      </section>
+    <% } else { %>
+      <!-- Guest homepage remains available to visitors who have not signed in. -->
+      <section class="home-hero">
+        <div class="hero-content">
+          <span class="hero-eyebrow">Care for every companion</span>
+          <h1>Welcome to FurryTales!</h1>
+          <p class="hero-subheading">Making Every Moment of Pet Care Special.</p>
+          <p class="hero-description">
+            From everyday pet care to comfortable boarding stays, FurryTales helps you keep your furry companions happy, healthy and well cared for.
+          </p>
+          <div class="hero-actions">
+            <a class="furrytales-button" href="/services">Explore Services</a>
+            <a class="furrytales-button furrytales-button-secondary" href="/services">Find Pet Boarding</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Equal-height cards give visitors direct access to the existing platform features. -->
+      <section class="features-section">
+        <div class="container">
+          <h2 class="features-heading">Everything your pet needs, in one place</h2>
+          <p class="features-intro">Simple ways to make caring for your companion a little easier.</p>
+          <div class="row g-4">
+            <div class="col-12 col-md-6 col-lg-4">
+              <article class="feature-card">
+                <div class="feature-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3.5" y="5" width="17" height="16" rx="2"></rect>
+                    <path d="M7.5 3v4M16.5 3v4M3.5 9.5h17M8 13h3M8 17h3"></path>
+                  </svg>
+                </div>
+                <h3>Book a Service</h3>
+                <p>Schedule grooming, bathing and other pet-care services for your furry companions.</p>
+                <a class="feature-link" href="/services">Explore Services <span aria-hidden="true">&rarr;</span></a>
+              </article>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+              <article class="feature-card">
+                <div class="feature-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"></path>
+                  </svg>
+                </div>
+                <h3>Pet Boarding</h3>
+                <p>Find a comfortable and welcoming place for your pets to stay while you're away on holidays or business trips.</p>
+                <a class="feature-link" href="/services">Find a Stay <span aria-hidden="true">&rarr;</span></a>
+              </article>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+              <article class="feature-card">
+                <div class="feature-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 3.5h10.5A2.5 2.5 0 0 1 19 6v14.5H7A3 3 0 0 1 4 17.5v-11a3 3 0 0 1 2-3Z"></path>
+                    <path d="M7 17.5h12M8 8h7M8 11.5h7"></path>
+                  </svg>
+                </div>
+                <h3>Pet Care Journal</h3>
+                <p>Keep track of your pets' health records, vaccinations, medical appointments and daily activities.</p>
+                <a class="feature-link" href="/journals">View Journal <span aria-hidden="true">&rarr;</span></a>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+    <% } %>
+  </main>
+</body>
+</html>
